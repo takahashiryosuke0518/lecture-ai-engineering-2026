@@ -1,0 +1,13 @@
+run_id,started_at,model,question,trial,status,elapsed_seconds,input_tokens,output_tokens,error_code,error_message
+905c7814-627f-4fee-a7ce-6d0ffa2ecaeb,2026-10-22T02:56:31.004814+00:00,gemini-3.5-flash-lite,LoRAとは何ですか？100字以内で説明してください。,1,success,0.9563384020002559,16,62,,
+905c7814-627f-4fee-a7ce-6d0ffa2ecaeb,2026-10-22T02:56:31.004814+00:00,gemini-3.5-flash-lite,LoRAとは何ですか？100字以内で説明してください。,2,success,0.8428120090002267,16,52,,
+905c7814-627f-4fee-a7ce-6d0ffa2ecaeb,2026-10-22T02:56:31.004814+00:00,gemini-3.5-flash-lite,LoRAとは何ですか？100字以内で説明してください。,3,success,1.6717729209995014,16,58,,
+905c7814-627f-4fee-a7ce-6d0ffa2ecaeb,2026-10-22T02:56:31.004814+00:00,gemini-3.5-flash-lite,LoRAとフルファインチューニングの違いを、計算コスト・学習パラメータ・保存容量の3点で説明してください。,1,success,3.59696096100015,26,734,,
+905c7814-627f-4fee-a7ce-6d0ffa2ecaeb,2026-10-22T02:56:31.004814+00:00,gemini-3.5-flash-lite,LoRAとフルファインチューニングの違いを、計算コスト・学習パラメータ・保存容量の3点で説明してください。,2,success,3.040409899000224,26,655,,
+905c7814-627f-4fee-a7ce-6d0ffa2ecaeb,2026-10-22T02:56:31.004814+00:00,gemini-3.5-flash-lite,LoRAとフルファインチューニングの違いを、計算コスト・学習パラメータ・保存容量の3点で説明してください。,3,success,2.606646096000077,26,657,,
+905c7814-627f-4fee-a7ce-6d0ffa2ecaeb,2026-10-22T02:56:31.004814+00:00,gemini-3.5-flash,LoRAとは何ですか？100字以内で説明してください。,1,success,8.965977120999923,16,60,,
+905c7814-627f-4fee-a7ce-6d0ffa2ecaeb,2026-10-22T02:56:31.004814+00:00,gemini-3.5-flash,LoRAとは何ですか？100字以内で説明してください。,2,success,7.767677378000371,16,55,,
+905c7814-627f-4fee-a7ce-6d0ffa2ecaeb,2026-10-22T02:56:31.004814+00:00,gemini-3.5-flash,LoRAとは何ですか？100字以内で説明してください。,3,success,8.10513611099941,16,54,,
+905c7814-627f-4fee-a7ce-6d0ffa2ecaeb,2026-10-22T02:56:31.004814+00:00,gemini-3.5-flash,LoRAとフルファインチューニングの違いを、計算コスト・学習パラメータ・保存容量の3点で説明してください。,1,error,3.4690732360004404,,,503,This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
+905c7814-627f-4fee-a7ce-6d0ffa2ecaeb,2026-10-22T02:56:31.004814+00:00,gemini-3.5-flash,LoRAとフルファインチューニングの違いを、計算コスト・学習パラメータ・保存容量の3点で説明してください。,2,success,12.171295539999846,26,914,,
+905c7814-627f-4fee-a7ce-6d0ffa2ecaeb,2026-10-22T02:56:31.004814+00:00,gemini-3.5-flash,LoRAとフルファインチューニングの違いを、計算コスト・学習パラメータ・保存容量の3点で説明してください。,3,success,14.750708821000444,26,912,,
