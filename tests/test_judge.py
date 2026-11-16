@@ -22,6 +22,55 @@ from app.judge import (
 INSTRUCTOR_LABELS = judge.ROOT / "lectures" / "04" / "reference" / "labels_instructor.jsonl"
 
 
+def test_generate_answers_saves_each_answer_and_skips_completed_cases(tmp_path, monkeypatch):
+    import app.agent as app_agent
+
+    cases = [
+        {"id": "1", "question": "answered", "answer": "既存回答", "reference": {"expected": "保持"}},
+        {"id": "2", "question": "generate then fail", "answer": "", "reference": {"expected": "保持"}},
+        {"id": "3", "question": "retry later", "answer": "", "reference": {"expected": "保持"}},
+    ]
+    output = tmp_path / "cases.jsonl"
+    calls = []
+    waits = []
+
+    class FakeAgent:
+        def __init__(self, responses):
+            self.responses = iter(responses)
+
+        def run_sync(self, question, model):
+            calls.append(question)
+            response = next(self.responses)
+            if isinstance(response, Exception):
+                raise response
+            return type("Result", (), {"output": response})()
+
+    fake_agent = FakeAgent(["生成済み回答", RuntimeError("API error")])
+    monkeypatch.setattr(app_agent, "agent", fake_agent)
+    monkeypatch.setattr(app_agent, "build_model", lambda: object())
+    monkeypatch.setattr(judge.time, "sleep", waits.append)
+
+    try:
+        judge.generate_answers(cases, wait=2.5, save_path=output)
+    except RuntimeError as error:
+        assert str(error) == "API error"
+    else:
+        raise AssertionError("API error should propagate")
+
+    saved = read_jsonl(output)
+    assert [case["answer"] for case in saved] == ["既存回答", "生成済み回答", ""]
+    assert [case["reference"] for case in saved] == [{"expected": "保持"}] * 3
+    assert calls == ["generate then fail", "retry later"]
+    assert waits == [2.5]
+
+    calls.clear()
+    fake_agent.responses = iter(["再開回答"])
+    judge.generate_answers(saved, wait=2.5, save_path=output)
+
+    assert calls == ["retry later"]
+    assert [case["answer"] for case in read_jsonl(output)] == ["既存回答", "生成済み回答", "再開回答"]
+
+
 def test_lecture_mark_is_checked_by_code():
     assert check_lecture_mark("LoRA は…\n\n関係する回：第2回") == "pass"
     assert check_lecture_mark("第2回で扱う LoRA は…\n\n以上です。") == "fail"  # 末尾に無ければ fail

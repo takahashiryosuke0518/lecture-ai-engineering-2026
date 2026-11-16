@@ -301,17 +301,25 @@ def compare_labels(a: dict[str, dict], b: dict[str, dict], name_a: str, name_b: 
 
 
 # ---------------------------------------------------------------- 回答の生成（宿題・実装）
-def generate_answers(cases: list[dict], wait: float = 1.0) -> list[dict]:
+def generate_answers(cases: list[dict], wait: float = 1.0, save_path: Path | None = None) -> list[dict]:
     """評価セットの各質問を自分のエージェント（app.agent）に投げ、回答を埋める。"""
+    pending = [case for case in cases if not case.get("answer")]
+    if not pending:
+        print("回答済みです")
+        return cases
+
     from app.agent import agent, build_model
 
     model = build_model()
-    print(f"回答を生成中 {len(cases)} 件 ", end="", flush=True)
-    for case in cases:
+    print(f"回答を生成中 {len(pending)} 件 ", end="", flush=True)
+    for index, case in enumerate(pending):
         result = agent.run_sync(case["question"], model=model)
         case["answer"] = str(result.output)
+        if save_path is not None:
+            write_jsonl(save_path, cases)
         print(".", end="", flush=True)
-        time.sleep(wait)
+        if wait and index + 1 < len(pending):
+            time.sleep(wait)
     print()
     return cases
 
@@ -343,11 +351,10 @@ def main(argv: list[str] | None = None) -> None:
 
     if args.generate:
         try:
-            cases = generate_answers(cases)
+            cases = generate_answers(cases, wait=args.wait, save_path=args.cases)
         except ModelHTTPError as e:
             print(api_error_message(e.status_code, str(e.body)[:200]))
             raise SystemExit(1)
-        write_jsonl(args.cases, cases)
         print(f"→ {args.cases} に回答を書き込みました。次に tools/annotate.py でラベルを付けてください")
         return
 
