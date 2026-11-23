@@ -124,6 +124,38 @@ def open_index(path: Path):
         db.close()
 
 
+def _add_context_pages(hits: list[dict]) -> list[dict]:
+    pages = {
+        (page["document_id"], page["page"]): page
+        for page in load_pages(RAG_SOURCE)
+    }
+    unique_hits = []
+    hit_page_ids = set()
+    for hit in hits:
+        if hit["page_id"] not in hit_page_ids:
+            unique_hits.append(hit)
+            hit_page_ids.add(hit["page_id"])
+
+    context_page_ids = set()
+    for hit in unique_hits:
+        context_pages = []
+        for page_number, relation in (
+            (hit["page"] - 1, "previous"),
+            (hit["page"] + 1, "next"),
+        ):
+            page = pages.get((hit["document_id"], page_number))
+            if (
+                page is None
+                or page["page_id"] in hit_page_ids
+                or page["page_id"] in context_page_ids
+            ):
+                continue
+            context_page_ids.add(page["page_id"])
+            context_pages.append({**page, "relation": relation})
+        hit["context_pages"] = context_pages
+    return unique_hits
+
+
 def search(query: str) -> list[dict]:
     """質問を埋め込み、近いページを最大RAG_TOP_K件返す。"""
     if not isinstance(query, str) or not query.strip():
@@ -135,7 +167,8 @@ def search(query: str) -> list[dict]:
                    vec_distance_cosine(embedding, ?) AS distance
             FROM chunks ORDER BY distance, page_id LIMIT ?
         """, (sqlite_vec.serialize_float32(vector), RAG_TOP_K))
-        return [dict(row) for row in rows]
+        hits = [dict(row) for row in rows]
+    return _add_context_pages(hits)
 
 
 def search_graph(query: str) -> dict:

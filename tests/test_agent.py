@@ -38,7 +38,24 @@ def test_base_tools_are_registered_and_called(monkeypatch):
 
 
 def test_material_result_reaches_the_model(monkeypatch):
-    hit = {"page_id": "lec02-main-p052", "lecture": 2, "page": 52, "content": "元の重みは固定"}
+    context_page = {
+        "page_id": "lec02-main-p051",
+        "document_id": "lec02-main",
+        "lecture": 2,
+        "document_title": "基盤モデルの仕組み",
+        "section": "選んだモデルを、いつ・どう直すか",
+        "title": "PEFT",
+        "page": 51,
+        "content": "本体は固定する",
+        "relation": "previous",
+    }
+    hit = {
+        "page_id": "lec02-main-p052",
+        "lecture": 2,
+        "page": 52,
+        "content": "元の重みは固定",
+        "context_pages": [context_page],
+    }
     monkeypatch.setattr("app.retrieval.search", lambda *args, **kwargs: [hit])
     model = TestModel(call_tools=["search_materials"])
     with agent.override(model=model):
@@ -46,3 +63,7 @@ def test_material_result_reaches_the_model(monkeypatch):
     returns = _parts(result, ToolReturnPart)
     assert returns and returns[0].tool_name == "search_materials"
     assert json.loads(returns[0].content)["results"] == [hit]
+    returned_context = json.loads(returns[0].content)["results"][0]["context_pages"][0]
+    assert returned_context["content"] == "本体は固定する"
+    assert returned_context["document_id"] == "lec02-main"
+    assert returned_context["page"] == 51
