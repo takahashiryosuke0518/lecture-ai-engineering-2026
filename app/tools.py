@@ -20,6 +20,40 @@ def load_glossary() -> list[dict]:
         return json.load(f)["terms"]
 
 
+def get_boke_materials(lecture: int, count: int = 3) -> str:
+    """指定した回の用語と定義を取得し、各用語についてボケとツッコミを作る。
+
+    取得したすべての用語を個別に扱い、1用語につき1組だけ生成する。
+    用語名を【用語名】で示し、続けて「ボケ：」「ツッコミ：」の順に出力する。
+    ボケとツッコミはそれぞれ1文、40文字程度を目安にする。
+    ボケは意外性のある勘違いや言葉遊びを中心にする。
+    ツッコミは関西弁を使い、用語の正しい意味を自然に含める。
+    複数の用語を1つのボケにまとめず、前置き・追加の用語解説・まとめは付けない。
+
+    例:
+    【MCPサーバー】
+    ボケ：MCPサーバーって、ビールも出てくるんですか？
+    ツッコミ：提供するのはツールや！居酒屋ちゃうねん！
+    """
+    glossary = load_glossary()
+    lecture_terms = [term for term in glossary if term["lecture"] == lecture]
+    if not lecture_terms:
+        available = sorted({term["lecture"] for term in glossary})
+        lectures = ", ".join(f"第{number}回" for number in available)
+        return f"第{lecture}回の用語はありません。利用可能な講義回: {lectures}"
+
+    if count < 1 or count > len(lecture_terms):
+        return f"用語数は1〜{len(lecture_terms)}件の範囲で指定してください。"
+
+    return json.dumps(
+        [
+            {"term": term["term"], "definition": term["definition"]}
+            for term in lecture_terms[:count]
+        ],
+        ensure_ascii=False,
+    )
+
+
 def _normalize(text: str) -> str:
     return text.casefold().replace(" ", "").replace("　", "")
 

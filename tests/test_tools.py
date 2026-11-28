@@ -39,6 +39,30 @@ def test_lecture_summary():
     assert "まだありません" in tools.get_lecture_summary(99)
 
 
+def test_get_boke_materials_returns_requested_terms_and_definitions():
+    materials = json.loads(tools.get_boke_materials(6, 3))
+
+    expected = [term for term in tools.load_glossary() if term["lecture"] == 6][:3]
+    assert materials == [
+        {"term": term["term"], "definition": term["definition"]}
+        for term in expected
+    ]
+
+
+def test_get_boke_materials_reports_available_lectures():
+    message = tools.get_boke_materials(99, 3)
+
+    assert "第99回" in message
+    assert "利用可能な講義回" in message
+    assert "第6回" in message
+
+
+def test_get_boke_materials_reports_valid_count_range():
+    message = tools.get_boke_materials(6, 10)
+
+    assert "1〜7件" in message
+
+
 def test_default_question_of_lecture1_is_answerable_from_glossary():
     """第1回の既定の質問（app.ask）は、第3回のエージェントが用語集で正しく答えられること。"""
     from app.ask import DEFAULT_QUESTION
